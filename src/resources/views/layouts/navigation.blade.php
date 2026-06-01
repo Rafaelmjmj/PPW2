@@ -19,7 +19,7 @@
                         Dashboard
                     </x-nav-link>
                     @if(auth()->user()->role === 'admin')
-                        <x-nav-link :href="route('admin')" :active="request()->routeIs('admin')">
+                        <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                             Admin
                         </x-nav-link>
                     @endif
@@ -82,7 +82,7 @@
                 Dashboard
             </x-responsive-nav-link>
             @if(auth()->user()->role === 'admin')
-                <x-responsive-nav-link :href="route('admin')" :active="request()->routeIs('admin')">
+                <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                     Admin
                 </x-responsive-nav-link>
             @endif
