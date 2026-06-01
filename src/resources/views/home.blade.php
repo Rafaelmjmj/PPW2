@@ -22,7 +22,7 @@
                     <a href="{{ route('dashboard') }}"
                        class="text-sm text-zinc-300 hover:text-white transition">Dashboard</a>
                     @if(auth()->user()->role === 'admin')
-                        <a href="{{ route('admin') }}"
+                        <a href="{{ route('admin.index') }}"
                            class="text-sm text-amber-400 hover:text-amber-300 transition">Admin</a>
                     @endif
                     <form method="POST" action="{{ route('logout') }}">
@@ -53,6 +53,17 @@
             <p class="text-zinc-400 text-lg max-w-xl mx-auto mb-10">
                 Explore filmes, conheça elencos, diretores e estúdios. Deixe sua avaliação e compartilhe sua opinião com outros cinéfilos.
             </p>
+
+            {{-- Busca --}}
+            <form method="GET" action="{{ route('busca') }}" class="flex gap-2 max-w-xl mx-auto mb-8">
+                <input type="text" name="q"
+                       placeholder="Buscar filmes, atores, diretores, produtoras..."
+                       class="flex-1 bg-zinc-900 border border-zinc-700 rounded-lg px-4 py-3 text-white placeholder-zinc-500 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:border-transparent text-sm">
+                <button type="submit"
+                        class="px-6 py-3 bg-amber-400 text-zinc-900 font-semibold rounded-lg hover:bg-amber-300 transition text-sm">
+                    Buscar
+                </button>
+            </form>
 
             @guest
                 <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
