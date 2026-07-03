@@ -16,7 +16,7 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('admin.filmes.store') }}">
+                <form method="POST" action="{{ route('admin.filmes.store') }}" enctype="multipart/form-data">
                     @csrf
 
                     {{-- Dados principais --}}
@@ -52,6 +52,14 @@
                             <textarea name="sinopse" rows="4"
                                       class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-400">{{ old('sinopse') }}</textarea>
                         </div>
+                    </div>
+
+                    {{-- Imagens --}}
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 border-t pt-4">Imagens</h3>
+                    <div class="mb-6">
+                        <input type="file" name="imagens[]" multiple accept="image/*"
+                               class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer">
+                        <p class="text-xs text-gray-400 mt-1">Máximo 5MB por imagem. Formatos aceitos: JPG, PNG, GIF, WebP.</p>
                     </div>
 
                     {{-- Gêneros --}}

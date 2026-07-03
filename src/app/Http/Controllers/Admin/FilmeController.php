@@ -9,8 +9,13 @@ use App\Models\Escritor;
 use App\Models\Estudio;
 use App\Models\Filme;
 use App\Models\Genero;
+use App\Models\Imagem;
 use App\Models\Produtor;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use Intervention\Image\Encoders\JpegEncoder;
+use Intervention\Image\Laravel\Facades\Image;
 
 class FilmeController extends Controller
 {
@@ -27,44 +32,58 @@ class FilmeController extends Controller
 
     public function store(Request $request)
     {
-        $data = $request->validate([
+        $request->validate([
             'nome'            => 'required|string|max:255',
             'duracao'         => 'nullable|integer|min:1',
             'data_lancamento' => 'nullable|date',
             'classificacao'   => 'nullable|string|max:50',
             'sinopse'         => 'nullable|string',
+            'imagens.*'       => 'nullable|image|max:5120',
         ]);
 
-        $filme = Filme::create($data);
+        $filme = Filme::create($request->only(['nome', 'duracao', 'data_lancamento', 'classificacao', 'sinopse']));
         $this->syncRelacionamentos($filme, $request);
+        $this->handleImageUpload($filme, $request);
 
         return redirect()->route('admin.filmes.index')->with('success', 'Filme criado com sucesso.');
     }
 
+    public function show(Filme $filme)
+    {
+        $filme->load('generos', 'estudios', 'atores.pessoa', 'diretores.pessoa', 'produtores.pessoa', 'escritores.pessoa', 'imagens');
+        return view('admin.filmes.show', compact('filme'));
+    }
+
     public function edit(Filme $filme)
     {
-        $filme->load('generos', 'estudios', 'atores', 'diretores', 'produtores', 'escritores');
+        $filme->load('generos', 'estudios', 'atores', 'diretores', 'produtores', 'escritores', 'imagens');
         return view('admin.filmes.edit', array_merge(['filme' => $filme], $this->formData()));
     }
 
     public function update(Request $request, Filme $filme)
     {
-        $data = $request->validate([
+        $request->validate([
             'nome'            => 'required|string|max:255',
             'duracao'         => 'nullable|integer|min:1',
             'data_lancamento' => 'nullable|date',
             'classificacao'   => 'nullable|string|max:50',
             'sinopse'         => 'nullable|string',
+            'imagens.*'       => 'nullable|image|max:5120',
         ]);
 
-        $filme->update($data);
+        $filme->update($request->only(['nome', 'duracao', 'data_lancamento', 'classificacao', 'sinopse']));
         $this->syncRelacionamentos($filme, $request);
+        $this->handleImageDelete($filme, $request);
+        $this->handleImageUpload($filme, $request);
 
         return redirect()->route('admin.filmes.index')->with('success', 'Filme atualizado com sucesso.');
     }
 
     public function destroy(Filme $filme)
     {
+        foreach ($filme->imagens as $imagem) {
+            Storage::disk('public')->delete($imagem->caminho);
+        }
         $filme->delete();
         return redirect()->route('admin.filmes.index')->with('success', 'Filme excluído com sucesso.');
     }
@@ -96,5 +115,39 @@ class FilmeController extends Controller
             }
         }
         $filme->atores()->sync($atoresSync);
+    }
+
+    private function handleImageUpload(Filme $filme, Request $request): void
+    {
+        if (!$request->hasFile('imagens')) return;
+
+        Storage::disk('public')->makeDirectory('imagens/filmes');
+
+        foreach ($request->file('imagens') as $file) {
+            $filename     = Str::random(40) . '.jpg';
+            $relativePath = 'imagens/filmes/' . $filename;
+            $fullPath     = Storage::disk('public')->path($relativePath);
+
+            Image::decode($file)->scaleDown(600, 400)->encode(new JpegEncoder(80))->save($fullPath);
+
+            $imagem = Imagem::create([
+                'caminho' => $relativePath,
+                'nome'    => $file->getClientOriginalName(),
+            ]);
+            $filme->imagens()->attach($imagem->id);
+        }
+    }
+
+    private function handleImageDelete(Filme $filme, Request $request): void
+    {
+        $ids = $request->input('deletar_imagens', []);
+        if (empty($ids)) return;
+
+        $imagens = Imagem::whereIn('id', $ids)->get();
+        foreach ($imagens as $imagem) {
+            Storage::disk('public')->delete($imagem->caminho);
+            $filme->imagens()->detach($imagem->id);
+            $imagem->delete();
+        }
     }
 }

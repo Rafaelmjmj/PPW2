@@ -37,7 +37,9 @@
                                 <td class="px-6 py-3 text-gray-600">{{ $filme->duracao ? $filme->duracao . ' min' : '—' }}</td>
                                 <td class="px-6 py-3 text-gray-600">{{ $filme->data_lancamento?->format('d/m/Y') ?? '—' }}</td>
                                 <td class="px-6 py-3 text-gray-600">{{ $filme->classificacao ?? '—' }}</td>
-                                <td class="px-6 py-3 text-right space-x-2">
+                                <td class="px-6 py-3 text-right space-x-3">
+                                    <a href="{{ route('admin.filmes.show', $filme) }}"
+                                       class="text-gray-500 hover:underline">Ver</a>
                                     <a href="{{ route('admin.filmes.edit', $filme) }}"
                                        class="text-blue-600 hover:underline">Editar</a>
                                     <form method="POST" action="{{ route('admin.filmes.destroy', $filme) }}"

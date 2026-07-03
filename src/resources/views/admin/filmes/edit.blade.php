@@ -26,7 +26,7 @@
                     $atoresPapel  = $filme->atores->pluck('pivot.papel', 'id')->toArray();
                 @endphp
 
-                <form method="POST" action="{{ route('admin.filmes.update', $filme) }}">
+                <form method="POST" action="{{ route('admin.filmes.update', $filme) }}" enctype="multipart/form-data">
                     @csrf @method('PATCH')
 
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3">Dados do Filme</h3>
@@ -62,6 +62,32 @@
                             <textarea name="sinopse" rows="4"
                                       class="w-full border border-gray-300 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-amber-400">{{ old('sinopse', $filme->sinopse) }}</textarea>
                         </div>
+                    </div>
+
+                    {{-- Imagens --}}
+                    <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 border-t pt-4">Imagens</h3>
+                    @if($filme->imagens->isNotEmpty())
+                        <p class="text-xs text-gray-500 mb-2">Marque as imagens que deseja remover:</p>
+                        <div class="grid grid-cols-3 sm:grid-cols-5 gap-3 mb-4">
+                            @foreach($filme->imagens as $imagem)
+                                <div class="text-center">
+                                    <img src="{{ asset('storage/' . $imagem->caminho) }}"
+                                         alt="{{ $imagem->nome }}"
+                                         class="w-full h-20 object-cover rounded border border-gray-200 mb-1">
+                                    <label class="flex items-center justify-center gap-1 text-xs text-red-600 cursor-pointer">
+                                        <input type="checkbox" name="deletar_imagens[]" value="{{ $imagem->id }}"
+                                               class="rounded border-gray-300 text-red-500 focus:ring-red-400">
+                                        Remover
+                                    </label>
+                                </div>
+                            @endforeach
+                        </div>
+                    @endif
+                    <div class="mb-6">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Adicionar novas imagens</label>
+                        <input type="file" name="imagens[]" multiple accept="image/*"
+                               class="w-full text-sm text-gray-600 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-medium file:bg-amber-50 file:text-amber-700 hover:file:bg-amber-100 cursor-pointer">
+                        <p class="text-xs text-gray-400 mt-1">Máximo 5MB por imagem.</p>
                     </div>
 
                     <h3 class="text-sm font-semibold text-gray-500 uppercase tracking-wide mb-3 border-t pt-4">Gêneros</h3>
@@ -136,9 +162,9 @@
                         <div class="space-y-2 mb-6">
                             @foreach($atores as $ator)
                                 @php
-                                    $oldDados     = old("atores.{$ator->id}", []);
-                                    $selecionado  = !empty($oldDados) ? !empty($oldDados['selecionado']) : in_array($ator->id, $atoresIds);
-                                    $papel        = $oldDados['papel'] ?? ($atoresPapel[$ator->id] ?? '');
+                                    $oldDados    = old("atores.{$ator->id}", []);
+                                    $selecionado = !empty($oldDados) ? !empty($oldDados['selecionado']) : in_array($ator->id, $atoresIds);
+                                    $papel       = $oldDados['papel'] ?? ($atoresPapel[$ator->id] ?? '');
                                 @endphp
                                 <div class="flex items-center gap-3">
                                     <input type="checkbox" name="atores[{{ $ator->id }}][selecionado]" value="1"
@@ -162,7 +188,7 @@
                                 class="px-5 py-2 bg-amber-400 text-zinc-900 text-sm font-medium rounded hover:bg-amber-300 transition">
                             Atualizar Filme
                         </button>
-                        <a href="{{ route('admin.filmes.index') }}"
+                        <a href="{{ route('admin.filmes.show', $filme) }}"
                            class="px-5 py-2 bg-gray-100 text-gray-700 text-sm font-medium rounded hover:bg-gray-200 transition">
                             Cancelar
                         </a>

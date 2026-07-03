@@ -2,11 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Ator;
-use App\Models\Diretor;
-use App\Models\Escritor;
 use App\Models\Estudio;
 use App\Models\Filme;
+use App\Models\Pessoa;
 use Illuminate\Http\Request;
 
 class SearchController extends Controller
@@ -19,19 +17,24 @@ class SearchController extends Controller
             return view('busca', ['termo' => $termo]);
         }
 
-        $filmes = Filme::where('nome', 'ilike', "%{$termo}%")->orderBy('nome')->get();
+        $filmes = Filme::where('nome', 'ilike', "%{$termo}%")
+            ->with('atores.pessoa', 'generos', 'imagens')
+            ->orderBy('nome')
+            ->get();
 
-        $atores = Ator::whereHas('pessoa', fn ($q) => $q->where('nome', 'ilike', "%{$termo}%"))
-            ->with('pessoa')->get()->sortBy('pessoa.nome');
-
-        $diretores = Diretor::whereHas('pessoa', fn ($q) => $q->where('nome', 'ilike', "%{$termo}%"))
-            ->with('pessoa')->get()->sortBy('pessoa.nome');
-
-        $escritores = Escritor::whereHas('pessoa', fn ($q) => $q->where('nome', 'ilike', "%{$termo}%"))
-            ->with('pessoa')->get()->sortBy('pessoa.nome');
+        $pessoas = Pessoa::where('nome', 'ilike', "%{$termo}%")
+            ->with([
+                'imagens',
+                'ator.filmes.imagens',
+                'diretor.filmes.imagens',
+                'produtor.filmes.imagens',
+                'escritor.filmes.imagens',
+            ])
+            ->orderBy('nome')
+            ->get();
 
         $produtoras = Estudio::where('nome', 'ilike', "%{$termo}%")->orderBy('nome')->get();
 
-        return view('busca', compact('termo', 'filmes', 'atores', 'diretores', 'escritores', 'produtoras'));
+        return view('busca', compact('termo', 'filmes', 'pessoas', 'produtoras'));
     }
 }
