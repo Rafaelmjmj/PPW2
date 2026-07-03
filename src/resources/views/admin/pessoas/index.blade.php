@@ -48,7 +48,9 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-3 text-gray-600">{{ $pessoa->nacionalidade ?? '—' }}</td>
-                                <td class="px-6 py-3 text-right space-x-2">
+                                <td class="px-6 py-3 text-right space-x-3">
+                                    <a href="{{ route('admin.pessoas.show', $pessoa) }}"
+                                       class="text-gray-500 hover:underline">Ver</a>
                                     <a href="{{ route('admin.pessoas.edit', $pessoa) }}"
                                        class="text-blue-600 hover:underline">Editar</a>
                                     <form method="POST" action="{{ route('admin.pessoas.destroy', $pessoa) }}"

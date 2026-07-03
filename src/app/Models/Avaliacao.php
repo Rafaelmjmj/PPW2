@@ -11,7 +11,9 @@ class Avaliacao extends Model
 
     protected $fillable = [
         'filme_id',
+        'user_id',
         'usuario_id',
+        'titulo',
         'nota',
         'descricao',
     ];
@@ -21,8 +23,8 @@ class Avaliacao extends Model
         return $this->belongsTo(Filme::class);
     }
 
-    public function usuario(): BelongsTo
+    public function user(): BelongsTo
     {
-        return $this->belongsTo(Usuario::class);
+        return $this->belongsTo(User::class);
     }
 }

@@ -31,6 +31,7 @@ RUN apt-get update && apt-get install -y \
     php8.3-bcmath \
     php8.3-opcache \
     php8.3-curl \
+    php8.3-gd \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
 
